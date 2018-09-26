@@ -19,6 +19,13 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void closeEvent(QCloseEvent *event);
+
+signals:
+    void starting();
+    void closing();
+
 private slots:
     void setProgramRSS();
     void setProgramWebCrawler();

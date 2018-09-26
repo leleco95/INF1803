@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QCloseEvent>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,7 +23,11 @@ MainWindow::MainWindow(QWidget *parent) :
     m_stackedWidget->addWidget(m_webCrawlerView);
     setCentralWidget(m_stackedWidget);
 
+    connect(this, SIGNAL(starting()), m_rssView, SLOT(load()));
+    connect(this, SIGNAL(closing()), m_rssView, SLOT(save()));
+
     setProgramRSS();
+    emit starting();
 }
 
 MainWindow::~MainWindow()
@@ -42,4 +47,10 @@ void MainWindow::setProgramWebCrawler()
     m_currentProgram = Program_WebCrawler;
     setWindowTitle("Web Crawler");
     m_stackedWidget->setCurrentWidget(m_webCrawlerView);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    emit closing();
+    event->accept();
 }
