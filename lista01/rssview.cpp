@@ -24,28 +24,36 @@ RSSView::RSSView(QWidget *parent) :
     gridLayout->setSpacing(2);
     mainLayout->addLayout(gridLayout);
 
+
+    // Network manager para baixar o conteúdo da página
     m_manager = new QNetworkAccessManager(this);
     connect(m_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
 
+
+    // Web engine para visualizar o artigo desejado
     m_webEngineView = new QWebEngineView(this);
     m_webEngineView->load(QUrl("about:blank"));
 
+    // Line edit e botão para adicionar novo RSS na lista
     m_urlLineEdit = new QLineEdit("");
 
     QPushButton *addButton = new QPushButton(tr("Add"));
     connect(addButton, SIGNAL(clicked(bool)), this, SLOT(addButtonClicked()));
 
+    // Combo box com os URLs cadastrados e botão de remover o atual
     m_urls = new QComboBox();
 
     QPushButton *removeButton = new QPushButton(tr("Remove"));
     connect(removeButton, SIGNAL(clicked(bool)), this, SLOT(removeButtonClicked()));
 
+    // Botões para carregar o RSS selecionado e limpar a página
     QPushButton *loadButton = new QPushButton(tr("Load RSS"));
     connect(loadButton, SIGNAL(clicked(bool)), this, SLOT(loadButtonClicked()));
 
     QPushButton *clearButton = new QPushButton(tr("Clear"));
     connect(clearButton, SIGNAL(clicked(bool)), this, SLOT(clearButtonClicked()));
 
+    // Combo box para alternar entre os artigos carregados
     m_elements = new QComboBox();
     connect(m_elements, SIGNAL(currentIndexChanged(int)), this, SLOT(elementsIndexChanged(int)));
 
@@ -74,36 +82,27 @@ void RSSView::replyFinished(QNetworkReply * netReply)
 
     m_elements->clear();
 
-    QString html = "<table border='1' cellspacing='0' style='border: 1px solid black; text-align: center;'><thead><tr><th>Title</th><th>Author</th><th>Link</th><th>Category</th><th>Publication Date</th><th>Description</th></thead><tbody>";
-
     for(uint i = 0; i < nodeList.length(); ++i)
     {
+        // Tratamento de cada elemento para pegar as tags desejadas e criar um HTML para visualização
         QDomNode node = nodeList.item(i);
         QDomElement e = node.toElement();
 
         QString elementHtml;
-
-        html += "<tr>";
-
         QTextDocument textDoc;
 
         textDoc.setHtml(e.elementsByTagName("title").item(0).firstChild().nodeValue());
         QString strTitle =  textDoc.toPlainText();
-        html += "<td>" + strTitle + "</td>" ;
 
         QString strAuthor = e.elementsByTagName("author").item(0).firstChild().nodeValue();
         if(strAuthor.isEmpty())
             strAuthor = e.elementsByTagName("dc:creator").item(0).firstChild().nodeValue();
-        html += "<td>" + strAuthor + "</td>";
 
         QString strLink = e.elementsByTagName("link").item(0).firstChild().nodeValue();
-        html += "<td><a href='" + strLink + "'>Full item</a></td>";
 
         QString strCategory = e.elementsByTagName("category").item(0).firstChild().nodeValue();
-        html += "<td>" + strCategory + "</td>";
 
         QString strPubDate = e.elementsByTagName("pubDate").item(0).firstChild().nodeValue();
-        html += "<td>" + strPubDate + "</td>";
 
         if(!e.elementsByTagName("description").item(0).isText())
             textDoc.setHtml(e.elementsByTagName("description").item(0).lastChild().nodeValue());
@@ -118,12 +117,9 @@ void RSSView::replyFinished(QNetworkReply * netReply)
         elementHtml += "<b>Description:</b> " + strDescription + "<br/><br/>";
         elementHtml += "<a href='" + strLink + "'>Read full article</a>";
 
-//        html += "<td>" + strDescription + "</td>";
-        html += "</tr>";
         m_elements->addItem(strTitle, elementHtml);
     }
 
-    html += "</tbody></table>";
     m_webEngineView->setHtml(m_elements->currentData().toString());
 }
 
