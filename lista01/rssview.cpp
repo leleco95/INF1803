@@ -40,7 +40,7 @@ RSSView::RSSView(QWidget *parent) :
     QPushButton *removeButton = new QPushButton(tr("Remove"));
     connect(removeButton, SIGNAL(clicked(bool)), this, SLOT(removeButtonClicked()));
 
-    QPushButton *loadButton = new QPushButton(tr("Load"));
+    QPushButton *loadButton = new QPushButton(tr("Load RSS"));
     connect(loadButton, SIGNAL(clicked(bool)), this, SLOT(loadButtonClicked()));
 
     QPushButton *clearButton = new QPushButton(tr("Clear"));
@@ -76,7 +76,7 @@ void RSSView::replyFinished(QNetworkReply * netReply)
 
     QString html = "<table border='1' cellspacing='0' style='border: 1px solid black; text-align: center;'><thead><tr><th>Title</th><th>Author</th><th>Link</th><th>Category</th><th>Publication Date</th><th>Description</th></thead><tbody>";
 
-    for (uint i = 0; i < nodeList.length(); i++)
+    for(uint i = 0; i < nodeList.length(); ++i)
     {
         QDomNode node = nodeList.item(i);
         QDomElement e = node.toElement();
